@@ -1,17 +1,24 @@
 import PySimpleGUI as sg
 import game_logic
 
-def main():
-    lower_limit, upper_limit = game_logic.get_limits()
-    secret_number, attempts = game_logic.initialize_game(lower_limit, upper_limit)
-
-    layout = [
+def create_layout():
+    # Створення макету інтерфейса
+    return [
         [sg.Text("Виберіть рівень складності:")],
-        [sg.Radio('Легкий (1-10)', "RADIO1", default=True, key='-EASY-'), sg.Radio('Середній (1-50)', "RADIO1", key='-MEDIUM-'), sg.Radio('Складний (1-100)', "RADIO1", key='-HARD-')],
+        [sg.Radio('Легкий (1-10)', "RADIO1", default=True, key='-EASY-'),
+         sg.Radio('Середній (1-50)', "RADIO1", key='-MEDIUM-'),
+         sg.Radio('Складний (1-100)', "RADIO1", key='-HARD-')],
         [sg.Text(f"Введіть число: ")],
         [sg.InputText(key='-INPUT-')],
         [sg.Button('ОК?'), sg.Button('Вийти')]
     ]
+
+def main():
+    lower_limit, upper_limit = game_logic.get_limits()
+    secret_number, attempts = game_logic.initialize_game(lower_limit, upper_limit)
+
+    # Використані функції для створення макету
+    layout = create_layout()
 
     window = sg.Window('Гра "Вгадай число"', layout)
 
@@ -22,14 +29,13 @@ def main():
             break
 
         user_guess = values['-INPUT-']
-        
-        # Определение уровня сложности
-        if values['-EASY-']:
-            lower_limit, upper_limit = 1, 10
-        elif values['-MEDIUM-']:
-            lower_limit, upper_limit = 1, 50
-        elif values['-HARD-']:
-            lower_limit, upper_limit = 1, 100
+
+        # Виявлення рівня складності
+        difficulty_levels = {'-EASY-': 10, '-MEDIUM-': 50, '-HARD-': 100}
+        for key, value in difficulty_levels.items():
+            if values[key]:
+                lower_limit, upper_limit = 1, value
+                break
 
         if event == 'ОК?':
             try:
@@ -42,7 +48,7 @@ def main():
                     sg.popup("Число менше.")
                 else:
                     sg.popup(f"Виграв {secret_number} за {attempts} спроб!")
-                    # Начать новую игру
+                    # Почати нову гру
                     secret_number, attempts = game_logic.initialize_game(lower_limit, upper_limit)
             except ValueError:
                 sg.popup("-_- нормалье число напишіть.")
